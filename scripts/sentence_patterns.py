@@ -8,7 +8,6 @@ This script takes a sentence and breaks it up into the largest possible repeatin
 """
 
 from collections import Counter
-from pprint import pprint
 import argparse
 import re
 import sys
