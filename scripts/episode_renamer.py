@@ -9,7 +9,18 @@ import sys
 import random
 
 TEST_MODE = False
-TEST_FILENAME = "4x06 This. No, really~ This.Is_A-fucking-ugly-name.so.let's.make_it_more_readable-Name....avi"
+TEST_FILENAME = "4x06 This. No, really~ This.Is_A-fucking-ugly-name.so.let's.make_it_more_readable-Name.720p.x264....avi"
+
+WORD_FILTER = [
+	"144p",
+	"240p",
+	"360p",
+	"480p",
+	"720p",
+	"1080p",
+	"HDTV",
+	"x264",
+]
 
 patterns = [
 r"(?i)(?P<name>.+?)\s*[\(\[\{]{1}\s*S\s*(?P<season>\d+)[\W\s]*E\s*(?P<episode>\d+)(?P<part>\w{0,1})\s*[\}\]\)]\s*\.(?P<container>\w+)$", # Name (S2E09b).ext
@@ -33,6 +44,12 @@ def get_data(filename):
 	name = name.replace("_", "#") # Temporarily replace underscores with hashes to make the regex easier
 	name = re.sub(r"\b[.\-#]\b", " ", name) # Convert This.Is_An-Episode.Name to This Is An Episode Name
 	name = name.replace("#", "_") # Change the remaining hashes back to underscores.
+	
+	for word in WORD_FILTER:
+		name = re.sub(r"(?i)%s" % word, "", name)
+	
+	name = " ".join(name.split()) # Convert multiple spaces to one
+	
 	if(match):
 		return (int(match.group('season')), int(match.group('episode')), match.group('part'), name, match.group('container').lower())
 	else:
