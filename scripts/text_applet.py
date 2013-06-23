@@ -15,6 +15,7 @@ import gtk
 import paramiko
 import time
 
+from socket import error as SocketError
 from subprocess import check_output
 
 class Indicator:
@@ -67,7 +68,7 @@ class Indicator:
 			if self.args.remote_host:
 				try:
 					ssh_stdin, ssh_stdout, ssh_stderr = self.ssh.exec_command(self.args.command)
-				except paramiko.SSHException:
+				except (paramiko.SSHException, SocketError):
 					try:
 						self.ssh.close()
 					except:
