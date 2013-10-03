@@ -30,7 +30,7 @@ def main():
 	parser.add_argument('-wf', '--word-file', default = "/usr/share/dict/words", help = "The word list (one word per line) to build the database from")
 	parser.add_argument('-db', '--database', default = "anagram_words.db", help = "The database file to use")
 	parser.add_argument('-w', '--word', type = lambda s: s.decode('utf-8'), help = "The word to find anagrams for")
-	parser.add_argument('-cs', '--case-sensitive', action = 'store_true', help = "Match case-sensitive")
+	parser.add_argument('-cs', '--case-sensitive', action = 'store_true', help = "Match case-sensitively")
 	args = parser.parse_args()
 	
 	db = sqlite3.connect(args.database)
