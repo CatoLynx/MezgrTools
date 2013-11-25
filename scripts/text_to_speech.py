@@ -6,10 +6,11 @@
 A VERY VERY BASIC, but flexible and easily customizable text-to-speech engine
 NOT AT ALL suited for long texts because it is very disk space intensive and absolutely not efficiently coded
 
-Just record wave files and name them what you recorded. Recommended basic setup is the letters of your language plus a few common diphtongs that are
-pronounced differently than just the letters themselves.
+Just record wave files and name them what you recorded. Recommended basic setup is the letters of your language plus a few
+common diphtongs that are pronounced differently than just the letters themselves.
 
-Example basic files for German would be a.wav, b.wav, c.wav, ..., z.wav, ä.wav, ö.wav, ü.wav, ß.wav, sch.wav, ch.wav and so on.
+Example basic files for German would be a.wav, b.wav, c.wav, ..., z.wav, ä.wav, ö.wav, ü.wav, ß.wav, sch.wav, ch.wav
+and so on.
 """
 
 import argparse
