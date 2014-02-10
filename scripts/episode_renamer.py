@@ -116,8 +116,8 @@ def main():
 		scheme = re.sub(r"(?i)\{N\}", "%(name)s", scheme)
 		scheme += ".%(container)s"
 		season, episode, part, name, container = get_data(random.choice(used_files))
-		example_name = scheme % {'season': season, 'episode': episode, 'part': part, 'name': name, 'container': container}
-		confirm = raw_input("Here is an example filename according to your name scheme:\n\n%s\n\nIs this OK? [Y/N]: " % example_name).upper()
+		example_name = scheme.decode('utf-8') % {'season': season, 'episode': episode, 'part': part, 'name': name, 'container': container}
+		confirm = raw_input(u"Here is an example filename according to your name scheme:\n\n%s\n\nIs this OK? [Y/N]: " % example_name).upper()
 		if(confirm == "Y"):
 			break
 	
@@ -127,7 +127,7 @@ def main():
 	failure_count = 0
 	for filename in used_files:
 		season, episode, part, name, container = get_data(filename)
-		new_filename = scheme % {'season': season, 'episode': episode, 'part': part, 'name': name, 'container': container}
+		new_filename = scheme.decode('utf-8') % {'season': season, 'episode': episode, 'part': part, 'name': name, 'container': container}
 		if(not os.path.exists(path + new_filename)):
 			try:
 				os.rename(path + filename, path + new_filename)
@@ -137,7 +137,7 @@ def main():
 			else:
 				success_count += 1
 		else:
-			print "Failed to rename %s: Destination file %s already exists." % (filename, new_filename)
+			print u"Failed to rename %s: Destination file %s already exists." % (filename, new_filename)
 			failure_count += 1
 	
 	print "%i files successfully renamed, %i errors." % (success_count, failure_count)
