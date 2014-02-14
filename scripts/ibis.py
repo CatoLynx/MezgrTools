@@ -7,6 +7,7 @@ IBIS (VDV 300) bus utility for various devices
 """
 
 import serial
+import time
 
 class IBISMaster(object):
 	def __init__(self, port):
@@ -29,22 +30,27 @@ class IBISMaster(object):
 		message += chr(check_byte)
 		return message
 	
+	def prepare_text(self, message):
+		message = message.replace(u"ä", "{")
+		message = message.replace(u"ö", "|")
+		message = message.replace(u"ü", "}")
+		message = message.replace(u"ß", "~")
+		message = message.replace(u"Ä", "[")
+		message = message.replace(u"Ö", "\\")
+		message = message.replace(u"Ü", "]")
+		return message
+	
 	def send_raw(self, data):
-		print repr(data)
+		#print repr(data)
 		hex_data = ""
 		for byte in data:
 			hex_data += "<%s>" % hex(ord(byte))[2:].upper().rjust(2, "0")
-		print hex_data
-		return self.device.write(data)
+		#print hex_data
+		length = self.device.write(data)
+		time.sleep(length * (12 / 1200.0))
+		return length
 	
 	def send_message(self, message):
-		message = message.replace("ä", "{")
-		message = message.replace("ö", "|")
-		message = message.replace("ü", "}")
-		message = message.replace("ß", "~")
-		message = message.replace("Ä", "[")
-		message = message.replace("Ö", "\\")
-		message = message.replace("Ü", "]")
 		message = self.hash(message + "\r")
 		return self.send_raw(message)
 	
@@ -69,6 +75,7 @@ class IBISMaster(object):
 		return self.send_message(message)
 	
 	def send_target_text__003a(self, text):
+		text = self.prepare_text(text)
 		blocks, remainder = divmod(len(text), 16)
 		
 		if remainder:
@@ -79,6 +86,7 @@ class IBISMaster(object):
 		return self.send_message(message)
 	
 	def send_target_text__021(self, text, id):
+		text = self.prepare_text(text)
 		blocks, remainder = divmod(len(text), 16)
 		
 		if remainder:
@@ -89,10 +97,12 @@ class IBISMaster(object):
 		return self.send_message(message)
 	
 	def send_next_stop__009(self, next_stop, length = 16):
+		next_stop = self.prepare_text(next_stop)
 		message = "v%s" % next_stop.upper().ljust(length)
 		return self.send_message(message)
 	
 	def send_next_stop__003c(self, next_stop):
+		next_stop = self.prepare_text(next_stop)
 		blocks, remainder = divmod(len(next_stop), 4)
 		
 		if remainder:
@@ -105,9 +115,7 @@ class IBISMaster(object):
 def main():
 	import time
 	master = IBISMaster("/dev/ttyUSB0")
-	while True:
-		master.send_next_stop__003c(time.strftime("%d.%m.%Y %H:%M"))
-		time.sleep(60)
+	master.send_next_stop__003c("")
 
 if __name__ == "__main__":
 	main()
