@@ -274,13 +274,11 @@ def main():
 	controller = Controller(master)
 	#controller.selftest()
 	while True:
-		controller.send_text(-1, ".")
+		for i in range(4):
+			controller.send_text(i, "-%i-" % i)
 		time.sleep(2)
-		controller.send_text(-1, "..")
-		time.sleep(2)
-		controller.send_text(-1, "...")
-		time.sleep(2)
-		controller.send_text(-1, "..")
+		for i in range(4):
+			controller.send_text(i, "+%i+" % i)
 		time.sleep(2)
 	listener = Listener(controller)
 	thread.start_new_thread(controller.run, ())
