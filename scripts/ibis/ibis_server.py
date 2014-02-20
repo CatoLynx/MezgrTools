@@ -235,8 +235,10 @@ class Controller(object):
 					self.send_text(address, current_text)
 					self.buffer[address]['last_refresh'] = now
 			elif message['type'] == 'time':
-				fmt = self.master.prepare_text(message['format'])
-				text = time.strftime(fmt)
+				try:
+					text = time.strftime(message['format'])
+				except:
+					text = time.strftime(message['format'].encode('utf-8'))
 				if current_text != text:
 					self.send_text(address, text)
 					self.buffer[address]['last_refresh'] = now
