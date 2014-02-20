@@ -39,7 +39,7 @@ class IBISMaster(object):
 			message = message.replace(u"Ä", "[")
 			message = message.replace(u"Ö", "\\")
 			message = message.replace(u"Ü", "]")
-			message = str(message)
+			message = message.encode('utf-8')
 			return message
 		
 		try:

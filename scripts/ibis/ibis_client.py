@@ -8,6 +8,7 @@ IBIS server client
 
 import argparse
 import json
+import re
 import socket
 import time
 
@@ -112,17 +113,42 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-host', '--host', type = str, default = "localhost")
 	parser.add_argument('-p', '--port', type = int, default = 4242)
-	parser.add_argument('-d', '--display', type = int, choices = [0, 1, 2, 3], required = True)
-	parser.add_argument('-t', '--type', choices = ['text', 'time', 'sequence'], default = 'text')
-	parser.add_argument('-v', '--value', type = str, required = True)
+	parser.add_argument('-d', '--display', type = int, choices = [0, 1, 2, 3])
+	parser.add_argument('-t', '--type', choices = ['text', 'time', 'sequence'])
+	parser.add_argument('-v', '--value', type = str)
+	parser.add_argument('-i', '--interval', type = float, default = 5.0)
+	parser.add_argument('-s', '--state', choices = ['on', 'off', 'toggle'])
 	args = parser.parse_args()
 	
 	client = Client(args.host, args.port)
+	
+	if args.state == 'on':
+		client.set_enabled(True)
+	elif args.state == 'off':
+		client.set_enabled(False)
+	elif args.state == 'toggle':
+		client.set_enabled('toggle')
 	
 	if args.type == 'text':
 		client.set_text(args.display, args.value)
 	elif args.type == 'time':
 		client.set_time(args.display, args.value)
+	elif args.type == 'sequence':
+		sequence = []
+		items = args.value.split("|")
+		for item in items:
+			try:
+				parts = item.split("~")
+				duration = float(parts[-1])
+				item = "~".join(parts[:-1])
+			except:
+				duration = None
+			
+			if re.match(r"^.*%[a-zA-Z].*$", item):
+				sequence.append(client.make_time(item, duration))
+			else:
+				sequence.append(client.make_text(item, duration))
+		client.set_sequence(args.display, sequence, args.interval)
 
 if __name__ == "__main__":
 	main()

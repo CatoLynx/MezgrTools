@@ -34,6 +34,7 @@ class Listener(object):
 					conn, addr = self.socket.accept()
 					print "Accepted connection from %s on port %i" % addr
 					data = conn.recv(4096)
+					
 					message = json.loads(data)
 					success = True
 					if 'enable' in message.keys():
@@ -150,7 +151,7 @@ class Controller(object):
 		# Send the data
 		self.master.send_next_stop__003c("" if text is None else text)
 		if self.DEBUG:
-			print address, text
+			print address, text.encode('utf-8')
 		
 		# Save the current text
 		self.current_text[address] = text if text else None
@@ -209,6 +210,30 @@ class Controller(object):
 		
 		Note: The 'interval' property of sequences is used for all messages that don't specify a duration of their own.
 		"""
+		
+		def _filter_ascii(message):
+			# Filter out everything that's not 7-bit ASCII
+			if message['type'] == 'text':
+				text = ""
+				for char in message['text']:
+					if ord(char) <= 127 or char in [u"ä", u"ö", u"ü", u"Ä", u"Ö", u"Ü", u"ß"]:
+						text += char
+				message['text'] = text
+			elif message['type'] == 'time':
+				text = ""
+				for char in message['format']:
+					if ord(char) <= 127 or char in [u"ä", u"ö", u"ü", u"Ä", u"Ö", u"Ü", u"ß"]:
+						text += char
+				message['format'] = text
+			return message
+		
+		if message['type'] == 'text':
+			message = _filter_ascii(message)
+		elif message['type'] == 'time':
+			message = _filter_ascii(message)
+		elif message['type'] == 'sequence':
+			for index, msg in enumerate(message['messages']):
+				message['messages'][index] = _filter_ascii(message['messages'][index])
 		
 		self.buffer[address]['message'] = message
 		
