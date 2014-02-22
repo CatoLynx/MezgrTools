@@ -82,25 +82,25 @@ class Controller(object):
 		self.buffer = {
 			0: {
 				'message': None,
-				'current': 0,
+				'current': -1,
 				'last_refresh': 0.0,
 				'last_update': 0.0
 			},
 			1: {
 				'message': None,
-				'current': 0,
+				'current': -1,
 				'last_refresh': 0.0,
 				'last_update': 0.0
 			},
 			2: {
 				'message': None,
-				'current': 0,
+				'current': -1,
 				'last_refresh': 0.0,
 				'last_update': 0.0
 			},
 			3: {
 				'message': None,
-				'current': 0,
+				'current': -1,
 				'last_refresh': 0.0,
 				'last_update': 0.0
 			}
@@ -236,6 +236,9 @@ class Controller(object):
 				message['messages'][index] = _filter_ascii(message['messages'][index])
 		
 		self.buffer[address]['message'] = message
+		self.buffer[address]['current'] = -1
+		self.buffer[address]['last_refresh'] = 0.0
+		self.buffer[address]['last_update'] = 0.0
 		
 		if self.VERBOSE:
 			print "Set message on display %i: %s" % (address, str(message))
@@ -275,7 +278,7 @@ class Controller(object):
 				default_interval = message['interval']
 				messages = message['messages']
 				current = self.buffer[address]['current']
-				if current >= len(messages) - 1:
+				if current == -1 or current >= len(messages) - 1:
 					next_message = 0
 				else:
 					next_message = current + 1
