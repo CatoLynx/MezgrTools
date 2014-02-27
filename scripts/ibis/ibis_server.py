@@ -48,6 +48,8 @@ class Listener(object):
 								self.controller.set_enabled(bool(message['enable']))
 							except:
 								success = False
+								import traceback
+								traceback.print_exc()
 						self.reply(conn, {'success': success})
 					elif 'query' in message.keys():
 						if message['query'] == 'current':
@@ -170,7 +172,8 @@ class Controller(object):
 			self.master.device.setRTS(1)
 		
 		# Truncate the text
-		text = text[:36]
+		if text:
+			text = text[:36]
 		
 		# Send the data
 		self.master.send_next_stop__003c("" if text is None else text)
