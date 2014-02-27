@@ -148,6 +148,9 @@ class Controller(object):
 			self.master.device.setDTR(1)
 			self.master.device.setRTS(1)
 		
+		# Truncate the text
+		text = text[:36]
+		
 		# Send the data
 		self.master.send_next_stop__003c("" if text is None else text)
 		if self.DEBUG:
