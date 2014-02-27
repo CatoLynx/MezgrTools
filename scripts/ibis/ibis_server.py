@@ -111,6 +111,27 @@ class Controller(object):
 			2: None,
 			3: None
 		}
+		
+		self.load_config()
+	
+	def save_config(self, filename = "ibis.json"):
+		data = {
+			'buffer': self.buffer,
+			'current_text': self.current_text,
+			'enabled': self.enabled,
+		}
+		
+		with open(filename, 'w') as f:
+			f.write(json.dumps(data))
+	
+	def load_config(self, filename = "ibis.json"):
+		with open(filename, 'r') as f:
+			data = json.loads(f.read())
+		
+		for id, entry in data['buffer'].iteritems():
+			if entry['message']:
+				self.set_message(int(id), entry['message'])
+		self.enabled = data['enabled']
 	
 	def set_enabled(self, value):
 		"""
@@ -243,6 +264,8 @@ class Controller(object):
 		self.buffer[address]['last_refresh'] = 0.0
 		self.buffer[address]['last_update'] = 0.0
 		
+		self.save_config()
+		
 		if self.VERBOSE:
 			print "Set message on display %i: %s" % (address, str(message))
 	
@@ -351,6 +374,7 @@ class Controller(object):
 		self.process_buffer()
 	
 	def quit(self):
+		self.save_config()
 		self.running = False
 
 def main():
