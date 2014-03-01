@@ -306,7 +306,7 @@ class Controller(object):
 		self.save_config()
 		
 		if self.VERBOSE:
-			print "Message on display %i set by %s: %s" % (address, client, str(message))
+			print "Message on display %i set by %s with priority %i: %s" % (address, client, priority, str(message))
 	
 	def send_message(self, address, message):
 		"""
