@@ -60,7 +60,7 @@ class Listener(object):
 							self.reply(conn, self.controller.enabled)
 					else:
 						try:
-							self.controller.set_message(message['address'], message['message'], priority = message.get('priority', 0), client = message.get('client', addr[0]))
+							success = self.controller.set_message(message['address'], message['message'], priority = message.get('priority', 0), client = message.get('client', addr[0]))
 						except:
 							success = False
 						self.reply(conn, {'success': success})
@@ -286,7 +286,7 @@ class Controller(object):
 		if priority < current_priority and client != current_client:
 			if self.VERBOSE:
 				print "Discarded message from %s for display %i (Priority was %i, current is %i set by %s)" % (client, address, priority, current_priority, current_client)
-			return
+			return False
 		
 		if message['type'] == 'text':
 			message = _filter_ascii(message)
@@ -307,6 +307,8 @@ class Controller(object):
 		
 		if self.VERBOSE:
 			print "Message on display %i set by %s with priority %i: %s" % (address, client, priority, str(message))
+		
+		return True
 	
 	def send_message(self, address, message):
 		"""
