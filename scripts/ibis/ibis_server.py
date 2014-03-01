@@ -125,11 +125,15 @@ class Controller(object):
 		}
 		
 		try:
-			pass#self.load_config()
+			self.load_config()
 		except:
-			pass
+			if self.VERBOSE:
+				print "Failed to load configuration"
 	
 	def save_config(self, filename = "ibis.json"):
+		if self.VERBOSE:
+			print "Saving configuration..."
+		
 		data = {
 			'buffer': self.buffer,
 			'current_text': self.current_text,
@@ -138,8 +142,14 @@ class Controller(object):
 		
 		with open(filename, 'w') as f:
 			f.write(json.dumps(data))
+		
+		if self.VERBOSE:
+			print "Successfully saved configuration"
 	
 	def load_config(self, filename = "ibis.json"):
+		if self.VERBOSE:
+			print "Loading configuration..."
+		
 		with open(filename, 'r') as f:
 			data = json.loads(f.read())
 		
@@ -147,6 +157,9 @@ class Controller(object):
 			if entry['message']:
 				self.set_message(int(id), entry['message'], priority = entry.get('priority', 0), client = entry.get('client', None))
 		self.enabled = data['enabled']
+		
+		if self.VERBOSE:
+			print "Successfully loaded configuration"
 	
 	def set_enabled(self, value):
 		"""
