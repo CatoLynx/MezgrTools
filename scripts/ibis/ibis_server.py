@@ -60,7 +60,7 @@ class Listener(object):
 							self.reply(conn, self.controller.enabled)
 					else:
 						try:
-							self.controller.set_message(message['address'], message['message'])
+							self.controller.set_message(message['address'], message['message'], priority = message.get('priority', 0), client = message.get('client', addr[0]))
 						except:
 							success = False
 						self.reply(conn, {'success': success})
@@ -81,32 +81,42 @@ class Controller(object):
 		self.master = master
 		self.running = False
 		self.enabled = True
+		
 		self.buffer = {
 			0: {
 				'message': None,
+				'priority': -1,
+				'client': None,
 				'current': -1,
 				'last_refresh': 0.0,
 				'last_update': 0.0
 			},
 			1: {
 				'message': None,
+				'priority': -1,
+				'client': None,
 				'current': -1,
 				'last_refresh': 0.0,
 				'last_update': 0.0
 			},
 			2: {
 				'message': None,
+				'priority': -1,
+				'client': None,
 				'current': -1,
 				'last_refresh': 0.0,
 				'last_update': 0.0
 			},
 			3: {
 				'message': None,
+				'priority': -1,
+				'client': None,
 				'current': -1,
 				'last_refresh': 0.0,
 				'last_update': 0.0
 			}
 		}
+		
 		self.current_text = {
 			0: None,
 			1: None,
@@ -114,7 +124,10 @@ class Controller(object):
 			3: None
 		}
 		
-		self.load_config()
+		try:
+			pass#self.load_config()
+		except:
+			pass
 	
 	def save_config(self, filename = "ibis.json"):
 		data = {
@@ -132,7 +145,7 @@ class Controller(object):
 		
 		for id, entry in data['buffer'].iteritems():
 			if entry['message']:
-				self.set_message(int(id), entry['message'])
+				self.set_message(int(id), entry['message'], priority = entry.get('priority', 0), client = entry.get('client', None))
 		self.enabled = data['enabled']
 	
 	def set_enabled(self, value):
@@ -183,7 +196,7 @@ class Controller(object):
 		# Save the current text
 		self.current_text[address] = text if text else None
 	
-	def set_message(self, address, message):
+	def set_message(self, address, message, priority = 0, client = None):
 		"""
 		Set the stuff to be displayed on a display, like a sequence of texts
 		
@@ -254,6 +267,14 @@ class Controller(object):
 				message['format'] = text
 			return message
 		
+		# Discard messages with a lower priority then the one in the buffer if not sent by the same client
+		current_priority = self.buffer[address]['priority']
+		current_client = self.buffer[address]['client']
+		if priority < current_priority and client != current_client:
+			if self.VERBOSE:
+				print "Discarded message from %s for display %i (Priority was %i, current is %i set by %s)" % (client, address, priority, current_priority, current_client)
+			return
+		
 		if message['type'] == 'text':
 			message = _filter_ascii(message)
 		elif message['type'] == 'time':
@@ -263,6 +284,8 @@ class Controller(object):
 				message['messages'][index] = _filter_ascii(message['messages'][index])
 		
 		self.buffer[address]['message'] = message
+		self.buffer[address]['priority'] = priority
+		self.buffer[address]['client'] = client
 		self.buffer[address]['current'] = -1
 		self.buffer[address]['last_refresh'] = 0.0
 		self.buffer[address]['last_update'] = 0.0
@@ -270,7 +293,7 @@ class Controller(object):
 		self.save_config()
 		
 		if self.VERBOSE:
-			print "Set message on display %i: %s" % (address, str(message))
+			print "Message on display %i set by %s: %s" % (address, client, str(message))
 	
 	def send_message(self, address, message):
 		"""

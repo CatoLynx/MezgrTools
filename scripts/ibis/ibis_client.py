@@ -41,12 +41,21 @@ class Client(object):
 		
 		return self.send_raw_message({'enable': value})
 	
-	def set_message(self, address, message):
+	def set_message(self, address, message, priority = 0, client = None):
 		"""
 		Set the message for a display
 		"""
 		
-		return self.send_raw_message({'address': address, 'message': message})
+		message = {
+			'address': address,
+			'message': message,
+			'priority': priority,
+		}
+		
+		if client:
+			message['client'] = client
+		
+		return self.send_raw_message(message)
 	
 	def make_text(self, text, duration = None):
 		message = {'type': 'text', 'text': text}
@@ -55,12 +64,12 @@ class Client(object):
 		
 		return message
 	
-	def set_text(self, address, text, duration = None):
+	def set_text(self, address, text, duration = None, priority = 0, client = None):
 		"""
 		Set a static text on a display
 		"""
 		
-		return self.set_message(address, self.make_text(text, duration))
+		return self.set_message(address, self.make_text(text, duration), priority, client)
 	
 	def make_time(self, format, duration = None):
 		message = {'type': 'time', 'format': format}
@@ -69,19 +78,19 @@ class Client(object):
 		
 		return message
 	
-	def set_time(self, address, format, duration = None):
+	def set_time(self, address, format, duration = None, priority = 0, client = None):
 		"""
 		Set a display to display the current time
 		"""
 		
-		return self.set_message(address, self.make_time(format, duration))
+		return self.set_message(address, self.make_time(format, duration), priority, client)
 	
-	def set_sequence(self, address, sequence, interval):
+	def set_sequence(self, address, sequence, interval, priority = 0, client = None):
 		"""
 		Set a display to display a sequence of messages
 		"""
 		
-		return self.set_message(address, {'type': 'sequence', 'messages': sequence, 'interval': interval})
+		return self.set_message(address, {'type': 'sequence', 'messages': sequence, 'interval': interval}, priority, client)
 	
 	def get_current_text(self):
 		"""
@@ -116,6 +125,8 @@ def main():
 	parser.add_argument('-d', '--display', type = int, choices = [0, 1, 2, 3])
 	parser.add_argument('-t', '--type', choices = ['text', 'time', 'sequence'])
 	parser.add_argument('-v', '--value', type = str)
+	parser.add_argument('-pr', '--priority', type = int, default = 0)
+	parser.add_argument('-c', '--client', type = str)
 	parser.add_argument('-i', '--interval', type = float, default = 5.0)
 	parser.add_argument('-s', '--state', choices = ['on', 'off', 'toggle'])
 	args = parser.parse_args()
@@ -130,9 +141,9 @@ def main():
 		client.set_enabled('toggle')
 	
 	if args.type == 'text':
-		client.set_text(args.display, args.value)
+		client.set_text(args.display, args.value, priority = args.priority, client = args.client)
 	elif args.type == 'time':
-		client.set_time(args.display, args.value)
+		client.set_time(args.display, args.value, priority = args.priority, client = args.client)
 	elif args.type == 'sequence':
 		sequence = []
 		items = args.value.split("|")
@@ -148,7 +159,7 @@ def main():
 				sequence.append(client.make_time(item, duration))
 			else:
 				sequence.append(client.make_text(item, duration))
-		client.set_sequence(args.display, sequence, args.interval)
+		client.set_sequence(args.display, sequence, args.interval, priority = args.priority, client = args.client)
 
 if __name__ == "__main__":
 	main()
