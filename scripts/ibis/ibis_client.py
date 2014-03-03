@@ -155,7 +155,7 @@ def main():
 			except:
 				duration = None
 			
-			if re.match(r"^.*%[a-zA-Z].*$", item):
+			if re.match(r"^.*%[-a-zA-Z].*$", item):
 				sequence.append(client.make_time(item, duration))
 			else:
 				sequence.append(client.make_text(item, duration))
