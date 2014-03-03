@@ -46,6 +46,7 @@ class Listener(object):
 						else:
 							try:
 								self.controller.set_enabled(bool(message['enable']))
+								success = True
 							except:
 								success = False
 								import traceback
