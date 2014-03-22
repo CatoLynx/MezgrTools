@@ -68,7 +68,7 @@ class Listener(object):
 							else:
 								state = bool(message['stop_indicator'])
 							
-							success = self.controller.set_stop_indicator(message['address'], state)
+							success = self.controller.set_stop_indicator(int(message['address']), state)
 						except:
 							success = False
 						self.reply(conn, {'success': success})
