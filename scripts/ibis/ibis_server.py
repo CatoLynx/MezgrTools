@@ -59,6 +59,19 @@ class Listener(object):
 							self.reply(conn, self.controller.buffer)
 						elif message['query'] == 'enabled':
 							self.reply(conn, self.controller.enabled)
+						elif message['query'] == 'stop_indicators':
+							self.reply(conn, self.controller.stop_indicators)
+					elif 'stop_indicator' in message.keys():
+						try:
+							if message['stop_indicator'] == 'toggle':
+								state = not self.controller.stop_indicators[message['address']]
+							else:
+								state = bool(message['stop_indicator'])
+							
+							success = self.controller.set_stop_indicator(message['address'], state)
+						except:
+							success = False
+						self.reply(conn, {'success': success})
 					else:
 						try:
 							success = self.controller.set_message(message['address'], message['message'], priority = message.get('priority', 0), client = message.get('client', addr[0]))
@@ -125,11 +138,38 @@ class Controller(object):
 			3: None
 		}
 		
+		self.stop_indicators = {
+			0: False,
+			1: False,
+			2: False,
+			3: False
+		}
+		
 		try:
 			self.load_config()
 		except:
 			if self.VERBOSE:
 				print "Failed to load configuration"
+	
+	def _reverse_prepare_text(self, message):
+		def _do_replace(message):
+			message = message.replace("{", u"ä")
+			message = message.replace("|", u"ö")
+			message = message.replace("}", u"ü")
+			message = message.replace("~", u"ß")
+			message = message.replace("[", u"Ä")
+			message = message.replace("\\", u"Ö")
+			message = message.replace("]", u"Ü")
+			message = message.encode('utf-8')
+			return message
+		
+		try:
+			message = _do_replace(message)
+		except UnicodeDecodeError:
+			message = message.decode('utf-8')
+			message = _do_replace(message)
+		
+		return message
 	
 	def save_config(self, filename = "ibis.json"):
 		if self.VERBOSE:
@@ -139,6 +179,7 @@ class Controller(object):
 			'buffer': self.buffer,
 			'current_text': self.current_text,
 			'enabled': self.enabled,
+			'stop_indicators': self.stop_indicators,
 		}
 		
 		with open(filename, 'w') as f:
@@ -154,13 +195,26 @@ class Controller(object):
 		with open(filename, 'r') as f:
 			data = json.loads(f.read())
 		
-		for id, entry in data['buffer'].iteritems():
+		for address, entry in data['buffer'].iteritems():
 			if entry['message']:
-				self.set_message(int(id), entry['message'], priority = entry.get('priority', 0), client = entry.get('client', None))
+				self.set_message(int(address), entry['message'], priority = entry.get('priority', 0), client = entry.get('client', None))
+		
+		for address, state in data['stop_indicators'].iteritems():
+			self.set_stop_indicator(int(address), state)
+		
 		self.enabled = data['enabled']
 		
 		if self.VERBOSE:
 			print "Successfully loaded configuration"
+	
+	def set_stop_indicator(self, address, value):
+		self.master.set_stop_indicator(address, value)
+		self.stop_indicators[address] = value
+		
+		if self.VERBOSE:
+			print "Stop indicator on display %i set to %s" % (address, str(value))
+		
+		self.save_config()
 	
 	def set_enabled(self, value):
 		"""
@@ -174,6 +228,8 @@ class Controller(object):
 		
 		if self.VERBOSE:
 			print "Power state changed to %s" % str(value)
+		
+		self.save_config()
 	
 	def send_text(self, address, text):
 		"""
@@ -208,7 +264,7 @@ class Controller(object):
 			print address, text.encode('utf-8')
 		
 		# Save the current text
-		self.current_text[address] = text if text else None
+		self.current_text[address] = self._reverse_prepare_text(text) if text else None
 	
 	def set_message(self, address, message, priority = 0, client = None):
 		"""
@@ -304,10 +360,10 @@ class Controller(object):
 		self.buffer[address]['last_refresh'] = 0.0
 		self.buffer[address]['last_update'] = 0.0
 		
-		self.save_config()
-		
 		if self.VERBOSE:
 			print "Message on display %i set by %s with priority %i: %s" % (address, client, priority, str(message))
+		
+		self.save_config()
 		
 		return True
 	
@@ -429,7 +485,14 @@ def main():
 	parser.add_argument('-p', '--port', type = int, default = 4242)
 	args = parser.parse_args()
 	
-	master = ibis.IBISMaster(args.serial_port)
+	gpio_pinmap = {
+		0: 28,
+		1: 29,
+		2: 31,
+		3: 30
+	}
+	
+	master = ibis.IBISMaster(args.serial_port, gpio_pinmap = gpio_pinmap)
 	controller = Controller(master)
 	controller.TIMEOUT = args.timeout
 	controller.VERBOSE = args.verbose

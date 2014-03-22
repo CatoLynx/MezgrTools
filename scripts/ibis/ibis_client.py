@@ -41,6 +41,13 @@ class Client(object):
 		
 		return self.send_raw_message({'enable': value})
 	
+	def set_stop_indicator(self, address, state):
+		"""
+		Enable or disable a stop indicator
+		"""
+		
+		return self.send_raw_message({'address': address, 'stop_indicator': state})
+	
 	def set_message(self, address, message, priority = 0, client = None):
 		"""
 		Set the message for a display
@@ -117,6 +124,15 @@ class Client(object):
 		
 		enabled = self.send_raw_message({'query': 'enabled'})
 		return enabled
+	
+	def get_stop_indicators(self):
+		"""
+		Query the server for the current state of the stop indicators
+		"""
+		
+		indicators = self.send_raw_message({'query': 'stop_indicators'})
+		indicators = dict([(int(key), value) for key, value in indicators.iteritems()])
+		return indicators
 
 def main():
 	parser = argparse.ArgumentParser()
@@ -129,6 +145,7 @@ def main():
 	parser.add_argument('-c', '--client', type = str)
 	parser.add_argument('-i', '--interval', type = float, default = 5.0)
 	parser.add_argument('-s', '--state', choices = ['on', 'off', 'toggle'])
+	parser.add_argument('-si', '--stop-indicator', choices = ['on', 'off', 'toggle'])
 	args = parser.parse_args()
 	
 	client = Client(args.host, args.port)
@@ -160,6 +177,13 @@ def main():
 			else:
 				sequence.append(client.make_text(item, duration))
 		client.set_sequence(args.display, sequence, args.interval, priority = args.priority, client = args.client)
+	
+	if args.stop_indicator == 'on':
+		client.set_stop_indicator(args.display, True)
+	elif args.stop_indicator == 'off':
+		client.set_stop_indicator(args.display, False)
+	elif args.stop_indicator == 'toggle':
+		client.set_stop_indicator(args.display, 'toggle')
 
 if __name__ == "__main__":
 	main()

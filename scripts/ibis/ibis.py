@@ -9,9 +9,37 @@ IBIS (VDV 300) bus utility for various devices
 import serial
 import time
 
+# Try importing the GPIO lib in case we're on a Raspberry Pi (to control the stop indicators)
+try:
+	import wiringpi
+	HAVE_GPIO = True
+except ImportError:
+	HAVE_GPIO = False
+
+"""
+Example GPIO pinmap:
+
+{
+	0: 28,
+	1: 29,
+	2: 31,
+	3: 30
+}
+
+(Display ID -> GPIO pin)
+"""
+
 class IBISMaster(object):
-	def __init__(self, port):
+	def __init__(self, port, gpio_pinmap = {}):
 		self.port = port
+		self.gpio_pinmap = gpio_pinmap
+		
+		if HAVE_GPIO:
+			self.gpio = wiringpi.GPIO(wiringpi.GPIO.WPI_MODE_GPIO)
+			
+			for pin in self.gpio_pinmap.values():
+				self.gpio.pinMode(pin, self.gpio.OUTPUT)
+		
 		self.device = serial.serial_for_url(
 			self.port,
 			baudrate = 1200,
@@ -49,6 +77,16 @@ class IBISMaster(object):
 			message = _do_replace(message)
 		
 		return message
+	
+	def set_stop_indicator(self, address, value):
+		if not HAVE_GPIO:
+			return False
+		
+		pin = self.gpio_pinmap.get(address, None)
+		if pin is None:
+			return False
+		
+		self.gpio.digitalWrite(pin, bool(value))
 	
 	def send_raw(self, data):
 		#print repr(data)
