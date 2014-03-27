@@ -264,7 +264,7 @@ class Controller(object):
 			print address, text.encode('utf-8')
 		
 		# Save the current text
-		self.current_text[address] = self._reverse_prepare_text(text) if text else None
+		self.current_text[address] = self._reverse_prepare_text(text).decode('utf-8') if text else None
 	
 	def set_message(self, address, message, priority = 0, client = None):
 		"""
