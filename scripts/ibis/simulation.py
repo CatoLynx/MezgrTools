@@ -157,8 +157,11 @@ class DisplayFontGenerator(object):
 				box = self.get_bounding_box(center_x, center_y, self.dotsize)
 				draw.ellipse(box, fill = color)
 		
-		with open(outfile.encode('utf-8'), 'wb') as f:
-			image.save(f, "PNG")
+		if type(outfile) is str:
+			with open(outfile.encode('utf-8'), 'wb') as f:
+				image.save(f, "PNG")
+		else:
+			image.save(outfile, "PNG")
 	
 	def generate_font(self, fontmap_file, outdir, inactive_color = (64, 64, 64), active_color = (192, 255, 0), bg_color = (0, 0, 0)):
 		"""
