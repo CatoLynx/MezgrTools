@@ -13,9 +13,10 @@ import socket
 import time
 
 class Client(object):
-	def __init__(self, host, port = 4242):
+	def __init__(self, host, port = 4242, timeout = 5.0):
 		self.host = host
 		self.port = port
+		self.timeout = timeout
 		self.socket = None
 	
 	def send_raw_message(self, message, expect_reply = True):
@@ -26,6 +27,7 @@ class Client(object):
 		reply = None
 		try:
 			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			sock.settimeout(self.timeout)
 			sock.connect((self.host, self.port))
 			sock.sendall(json.dumps(message))
 			if expect_reply:
