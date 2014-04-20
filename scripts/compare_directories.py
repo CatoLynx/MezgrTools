@@ -32,20 +32,36 @@ def main():
 		print "Files present only in %s:\n%s" % (args.dir_2, "\n".join(files_only_in_2))
 	elif args.action == 'copy-to-1':
 		print "Copying files that are present only in %s to %s..." % (args.dir_2, args.dir_1)
+		n = len(files_only_in_2)
+		i = 1
 		for f in files_only_in_2:
+			print "[%i / %i] Copying %s..." % (i, n, f)
 			shutil.copy(os.path.join(args.dir_2, f), args.dir_1)
+			i += 1
 	elif args.action == 'copy-to-2':
 		print "Copying files that are present only in %s to %s..." % (args.dir_1, args.dir_2)
+		n = len(files_only_in_1)
+		i = 1
 		for f in files_only_in_1:
+			print "[%i / %i] Copying %s..." % (i, n, f)
 			shutil.copy(os.path.join(args.dir_1, f), args.dir_2)
+			i += 1
 	elif args.action == 'move-to-1':
 		print "Moving files that are present only in %s to %s..." % (args.dir_2, args.dir_1)
+		n = len(files_only_in_2)
+		i = 1
 		for f in files_only_in_2:
+			print "[%i / %i] Moving %s..." % (i, n, f)
 			shutil.move(os.path.join(args.dir_2, f), args.dir_1)
+			i += 1
 	elif args.action == 'move-to-2':
 		print "Moving files that are present only in %s to %s..." % (args.dir_1, args.dir_2)
+		n = len(files_only_in_1)
+		i = 1
 		for f in files_only_in_1:
+			print "[%i / %i] Moving %s..." % (i, n, f)
 			shutil.move(os.path.join(args.dir_1, f), args.dir_2)
+			i += 1
 
 if __name__ == "__main__":
 	main()
