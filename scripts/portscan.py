@@ -9,6 +9,7 @@ Script to scan ports on IP subnets
 import argparse
 import nmap
 import requests
+import sys
 
 from lxml import etree
 
@@ -19,25 +20,29 @@ def main():
 	parser.add_argument('-v', '--verbose', action = 'store_true', help = "Show extra details, e.g. HTML Title")
 	args = parser.parse_args()
 	
-	scanner = nmap.PortScanner()
-	scanner.scan(args.subnet, str(args.port), arguments = '-n')
-	hosts = scanner.all_hosts()
+	print "Scanning subnet %s..." % args.subnet
+	try:
+		scanner = nmap.PortScanner()
+		scanner.scan(args.subnet, str(args.port), arguments = '')
+		hosts = [host for host in scanner.all_hosts() if scanner[host]['tcp'][args.port]['state'] == 'open']
+	except KeyboardInterrupt:
+		print "Aborting."
+		sys.exit(1)
+	print "Found %i open hosts." % len(hosts)
 	
 	for host in hosts:
-		try:
-			if scanner[host]['tcp'][args.port]['state'] != 'open':
-				continue
-		except:
-			continue
-		
 		details = scanner[host].tcp(args.port)
 		
 		if args.verbose:
 			if args.port in [80, 443]:
 				scheme = "https://" if args.port == 443 else "http://"
+				print "Checking %s..." % host,
 				try:
 					http_response = requests.get(scheme + host)
 					tree = etree.HTML(http_response.text)
+				except KeyboardInterrupt:
+					print "Aborting."
+					sys.exit(1)
 				except:
 					title = None
 				else:
