@@ -58,6 +58,9 @@ def main():
 					print "%s%s/ (Product: %s)" % (scheme, host, details['product'])
 			else:
 				print "%s - %s" % (host, details['product'])
+		else:
+			scheme = "https://" if args.port == 443 else "http://"
+			print "%s%s" % (scheme, host)
 
 if __name__ == "__main__":
 	main()
