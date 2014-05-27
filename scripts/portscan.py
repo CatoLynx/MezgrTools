@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# © 2013 Julian Metzler
+# © 2014 Julian Metzler
 
 """
 Script to scan ports on IP subnets
