@@ -13,6 +13,14 @@ import sys
 
 from lxml import etree
 
+SCHEMES = {
+	21: "ftp://",
+	22: "ssh://",
+	25: "smtp://",
+	80: "http://",
+	443: "https://",
+}
+
 def main():
 	parser = argparse.ArgumentParser(description = "A tool to scan IP subnets for open ports")
 	parser.add_argument('-s', '--subnet', required = True, type = str, help = "The subnet to scan, e.g. 1.2.3.0/24")
@@ -59,7 +67,7 @@ def main():
 			else:
 				print "%s - %s" % (host, details['product'])
 		else:
-			scheme = "https://" if args.port == 443 else "http://"
+			scheme = SCHEMES.get(args.port, "")
 			print "%s%s" % (scheme, host)
 
 if __name__ == "__main__":
