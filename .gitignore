@@ -1,4 +1,3 @@
 *.pyc
-*.db
 scripts/speech-data*
 *.json
