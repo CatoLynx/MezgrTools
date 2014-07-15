@@ -40,6 +40,9 @@ def get_data(filename):
 		if(match):
 			break
 	
+	if not match:
+		return False
+	
 	name = re.sub(r"\s*\[.*\]", "", match.group('name'))
 	name = name.replace("_", "#") # Temporarily replace underscores with hashes to make the regex easier
 	name = re.sub(r"\b[.\-#]\b", " ", name) # Convert This.Is_An-Episode.Name to This Is An Episode Name
