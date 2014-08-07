@@ -17,11 +17,11 @@ def open_link(view, frame, request, action, decision):
 
 def main():
 	gobject.threads_init()
-	win = gtk.Window()
-	bro = webkit.WebView()
-	bro.connect("navigation-policy-decision-requested", open_link)
-	bro.open("https://tweetdeck.twitter.com/")
-	win.add(bro)
+	win  = gtk.Window()
+	bruh = webkit.WebView()
+	bruh.connect("navigation-policy-decision-requested", open_link)
+	bruh.open("https://tweetdeck.twitter.com/")
+	win.add(bruh)
 	win.show_all()
 
 	gtk.main()
