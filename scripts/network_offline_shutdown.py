@@ -47,7 +47,7 @@ def main():
     # Check the time to see if we're in the right time of day
     print("Checking time...")
     current_time = datetime.datetime.now().time()
-    if current_time < start_time or current_time > end_time:
+    if (start_time < end_time and (current_time < start_time or current_time > end_time)) or (start_time > end_time and (current_time < start_time and current_time > end_time)):
         print("Not the right time, exiting.")
         return
 
