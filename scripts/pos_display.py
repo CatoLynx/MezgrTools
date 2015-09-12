@@ -24,15 +24,15 @@ class POSDisplay(object):
     return text
   
   def clear(self):
-    self.port.write(chr(12))
-    self.port.write(chr(11))
+    self.port.write(bytearray(12))
+    self.port.write(bytearray(11))
   
   def write_line(self, line, text):
-    self.port.write(chr(31)) # Enter command mode
-    self.port.write(chr(36)) # Line select
-    self.port.write(chr(1))
-    self.port.write(chr(line + 1))
-    self.port.write(self._prepare_text(text))
+    self.port.write(bytearray(31)) # Enter command mode
+    self.port.write(bytearray(36)) # Line select
+    self.port.write(bytearray(1))
+    self.port.write(bytearray(line + 1))
+    self.port.write(bytes(self._prepare_text(text), 'UTF-8'))
   
   def write(self, top = "", bottom = "", top_align = 'center', bottom_align = 'center'):
     if not bottom and len(top) > 20:
@@ -53,7 +53,7 @@ class POSDisplay(object):
         bottom = bottom[:20].ljust(20)
     
     self.clear()
-    self.port.write(self._prepare_text(top + bottom))
+    self.port.write(bytes(self._prepare_text(top + bottom), 'UTF-8'))
 
 def main():
   parser = argparse.ArgumentParser(description = "POS Display Control")
